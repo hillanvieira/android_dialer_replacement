@@ -2,6 +2,7 @@ package com.mbarrben.dialer
 
 import android.annotation.TargetApi
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.os.Build
 import android.telecom.Call
 import android.telecom.InCallService
@@ -18,7 +19,9 @@ class CallService : InCallService() {
     super.onCallAdded(call)
     Log.i(LOG_TAG, "onCallAdded: $call")
     call.registerCallback(callCallback)
-    startActivity(Intent(this, CallActivity::class.java))
+    val intent = Intent(this, CallActivity::class.java)
+    intent.flags = FLAG_ACTIVITY_NEW_TASK
+    startActivity(intent)
     CallManager.updateCall(call)
   }
 

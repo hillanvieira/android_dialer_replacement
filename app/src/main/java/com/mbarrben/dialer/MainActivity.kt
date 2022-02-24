@@ -6,7 +6,7 @@ import android.content.Context.TELECOM_SERVICE
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.telecom.TelecomManager
 import android.widget.Toast
 
@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity() {
   }
 
   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    super.onActivityResult(requestCode, resultCode, data)
     when (requestCode) {
       REQUEST_CODE_SET_DEFAULT_DIALER -> checkSetDefaultDialerResult(resultCode)
     }
@@ -53,4 +54,5 @@ class MainActivity : AppCompatActivity() {
 
     Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
   }
+
 }

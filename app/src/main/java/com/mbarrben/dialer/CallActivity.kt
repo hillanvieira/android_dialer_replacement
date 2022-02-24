@@ -1,16 +1,18 @@
 package com.mbarrben.dialer
 
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.telecom.TelecomManager
 import android.util.Log
 import android.view.View
-import com.mbarrben.dialer.R.id.buttonAnswer
-import com.mbarrben.dialer.R.id.buttonHangup
-import com.mbarrben.dialer.R.id.textDisplayName
-import com.mbarrben.dialer.R.id.textDuration
-import com.mbarrben.dialer.R.id.textStatus
+import androidx.appcompat.app.AppCompatActivity
+import com.mbarrben.dialer.databinding.ActivityCallBinding
 import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposables
 import java.util.concurrent.TimeUnit
+
 
 class CallActivity : AppCompatActivity() {
 
@@ -18,17 +20,21 @@ class CallActivity : AppCompatActivity() {
     private const val LOG_TAG = "CallActivity"
   }
 
+  private lateinit var binding: ActivityCallBinding
+
   private var updatesDisposable = Disposables.empty()
   private var timerDisposable = Disposables.empty()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_call)
+
+    binding = ActivityCallBinding.inflate(layoutInflater)
+    setContentView(binding.root)
 
     hideBottomNavigationBar()
 
-    buttonHangup.setOnClickListener { CallManager.cancelCall() }
-    buttonAnswer.setOnClickListener { CallManager.acceptCall() }
+    binding.buttonHangup.setOnClickListener { CallManager.cancelCall() }
+    binding.buttonAnswer.setOnClickListener { CallManager.acceptCall() }
   }
 
   override fun onResume() {
@@ -40,11 +46,11 @@ class CallActivity : AppCompatActivity() {
   }
 
   private fun updateView(gsmCall: GsmCall) {
-    textStatus.visibility = when (gsmCall.status) {
+    binding.textStatus.visibility = when (gsmCall.status) {
       GsmCall.Status.ACTIVE -> View.GONE
       else                  -> View.VISIBLE
     }
-    textStatus.text = when (gsmCall.status) {
+    binding.textStatus.text = when (gsmCall.status) {
       GsmCall.Status.CONNECTING   -> "Connecting…"
       GsmCall.Status.DIALING      -> "Calling…"
       GsmCall.Status.RINGING      -> "Incoming call"
@@ -52,17 +58,17 @@ class CallActivity : AppCompatActivity() {
       GsmCall.Status.DISCONNECTED -> "Finished call"
       GsmCall.Status.UNKNOWN      -> ""
     }
-    textDuration.visibility = when (gsmCall.status) {
+    binding.textDuration.visibility = when (gsmCall.status) {
       GsmCall.Status.ACTIVE -> View.VISIBLE
       else                  -> View.GONE
     }
-    buttonHangup.visibility = when (gsmCall.status) {
+    binding.buttonHangup.visibility = when (gsmCall.status) {
       GsmCall.Status.DISCONNECTED -> View.GONE
       else                        -> View.VISIBLE
     }
 
     if (gsmCall.status == GsmCall.Status.DISCONNECTED) {
-      buttonHangup.postDelayed({ finish() }, 3000)
+      binding.buttonHangup.postDelayed({ finish() }, 3000)
     }
 
     when (gsmCall.status) {
@@ -71,9 +77,9 @@ class CallActivity : AppCompatActivity() {
       else                        -> Unit
     }
 
-    textDisplayName.text = gsmCall.displayName ?: "Unknown"
+    binding.textDisplayName.text = gsmCall.displayName ?: "Unknown"
 
-    buttonAnswer.visibility = when (gsmCall.status) {
+    binding.buttonAnswer.visibility = when (gsmCall.status) {
       GsmCall.Status.RINGING -> View.VISIBLE
       else                   -> View.GONE
     }
@@ -91,7 +97,7 @@ class CallActivity : AppCompatActivity() {
   private fun startTimer() {
     timerDisposable = Observable.interval(1, TimeUnit.SECONDS)
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { textDuration.text = it.toDurationString() }
+        .subscribe { binding.textDuration.text = it.toDurationString() }
   }
 
   private fun stopTimer() {
@@ -99,4 +105,6 @@ class CallActivity : AppCompatActivity() {
   }
 
   private fun Long.toDurationString() = String.format("%02d:%02d:%02d", this / 3600, (this % 3600) / 60, (this % 60))
+
+
 }
